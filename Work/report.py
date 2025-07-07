@@ -1,41 +1,25 @@
 # report.py
 import csv
+from fileparse import parse_csv
+from stock import Stock
 
 def read_portfolio(filename):
     '''
     Read a stock portfolio file into a list of dictionaries with keys
     name, shares, and price.
     '''
-    portfolio = []
     with open(filename) as f:
-        rows = csv.reader(f)
-        headers = next(rows)
+        portdicts = parse_csv(f, select=['name','shares','price'], types=[str,int,float])
+        portfolio = [Stock(d['name'], d['shares'], d['price']) for d in portdicts]
+        return portfolio
 
-        for row in rows:
-            record = dict(zip(headers, row))
-            stock = {
-                 'name'   : record['name'],
-                 'shares' : int(record['shares']),
-                 'price'   : float(record['price'])
-            }
-            portfolio.append(stock)
-
-    return portfolio
 
 def read_prices(filename):
     '''
     Read a CSV file of price data into a dict mapping names to prices.
     '''
-    prices = {}
     with open(filename) as f:
-        rows = csv.reader(f)
-        for row in rows:
-            try:
-                prices[row[0]] = float(row[1])
-            except IndexError:
-                pass
-
-    return prices
+        return dict(parse_csv(f, types=[str, float], has_headers=False))
 
 def make_report_data(portfolio, prices):
     '''
@@ -44,9 +28,9 @@ def make_report_data(portfolio, prices):
     '''
     rows = []
     for stock in portfolio:
-        current_price = prices[stock['name']]
-        change        = current_price - stock['price']
-        summary       = (stock['name'], stock['shares'], current_price, change)
+        current_price = prices[stock.name]
+        change        = current_price - stock.price
+        summary       = (stock.name, stock.shares, current_price, change)
         rows.append(summary)
     return rows
 
@@ -69,8 +53,16 @@ def portfolio_report(portfolio_path, prices_path):
 
     # Output the report
     print_report(report)
-
-
     
-        
+def main(args):
+    if len(args) != 3:
+        raise SystemExit('Usage: %s portfile pricefile' % args[0])
+    portfolio_report(args[1], args[2])
+    
+if __name__ == '__main__':
+    import sys
+    main(sys.argv)
+    
+    
+
 
