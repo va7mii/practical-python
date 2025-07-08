@@ -1,6 +1,13 @@
+from typedproperty import typedproperty, String, Integer, Float
 class Stock:
     # _shares is the real box, shares is a disguise
-    __slots__= ('name','_shares','price')
+    #__slots__= ('name','_shares','price')
+    
+    name = String('name')
+    shares = Integer('shares')
+    price = Float('price')
+    
+    
     def __init__(self, name, shares, price):
         self.name = name
         self.shares = shares # actually calls the shares.setter behind the scenes
@@ -15,17 +22,6 @@ class Stock:
 
     def sell(self, shares):
         self.shares -= shares
-
-    @property
-    def shares(self):
-        return self._shares
-    
-    @shares.setter
-    def shares(self, value):
-        if not isinstance(value, int):
-            raise TypeError('Expected int')
-        self._shares = value
-    
     
 
     
